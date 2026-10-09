@@ -1,0 +1,204 @@
+/* ==========================================================================
+   WLSA Sound Art Club — CCA Fair booth cards (game card + pitch card)
+   Shared design system, matching the recruitment poster's palette & type.
+
+   Design space (logical px @ 96 dpi):
+     - game-card.html  : A5 portrait  559 x 794
+     - pitch-card.html : A6 portrait  397 x 559
+   Rendered at 3.125x to reach 300 dpi.
+   ========================================================================== */
+
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: block;
+  src: url('../poster/fonts/fraunces-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Fraunces';
+  font-style: italic;
+  font-weight: 400 700;
+  font-display: block;
+  src: url('../poster/fonts/fraunces-italic.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: block;
+  src: url('../poster/fonts/inter.woff2') format('woff2');
+}
+
+:root {
+  --paper: #FBF6EE;
+  --ink: #211A12;
+  --body: #4A4238;
+  --muted: #8A7F70;
+  --orange: #E8590C;
+  --blue: #0E86C8;
+  --red: #E04028;
+  --hairline: rgba(33, 26, 18, 0.14);
+
+  --font-display: 'Fraunces', 'Bahnschrift', 'Segoe UI', Georgia, serif;
+  --font-body: 'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; overflow: hidden; background: var(--paper); }
+
+.card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background:
+    radial-gradient(520px 420px at 96% -4%, rgba(232, 89, 12, 0.12), transparent 60%),
+    radial-gradient(460px 420px at -2% 24%, rgba(14, 134, 200, 0.10), transparent 60%),
+    radial-gradient(520px 480px at 102% 104%, rgba(224, 64, 40, 0.10), transparent 60%),
+    linear-gradient(180deg, #FDF9F1 0%, var(--paper) 55%, #F4ECDD 100%);
+  color: var(--ink);
+  font-family: var(--font-body);
+  display: flex;
+  flex-direction: column;
+}
+
+.accent { color: var(--orange); }
+.blue { color: var(--blue); }
+
+/* --- Header ------------------------------------------------------------ */
+.kicker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-body);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.kicker .mark {
+  width: 30px;
+  height: 30px;
+  flex: none;
+}
+.kicker .mark svg { display: block; width: 100%; height: 100%; }
+
+/* --- Big title --------------------------------------------------------- */
+.title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.title .cn {
+  display: block;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.tagline {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  color: var(--body);
+}
+
+/* --- Numbered steps ---------------------------------------------------- */
+.steps { list-style: none; }
+.steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.steps .num {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--blue);
+  color: #FFF9F2;
+  font-family: var(--font-body);
+  font-weight: 700;
+  border-radius: 50%;
+}
+.steps .txt { font-family: var(--font-body); color: var(--ink); }
+
+/* --- Highlighted prize box -------------------------------------------- */
+.prize {
+  background: var(--orange);
+  color: #FFF9F2;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(232, 89, 12, 0.30);
+  font-family: var(--font-body);
+  font-weight: 700;
+}
+
+/* --- Teaser chips ------------------------------------------------------ */
+.chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.chip {
+  background: #FFFFFF;
+  border: 2px solid var(--hairline);
+  border-radius: 999px;
+  padding: 9px 18px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  color: var(--body);
+  white-space: nowrap;
+}
+
+/* --- Perk list --------------------------------------------------------- */
+.perks { list-style: none; }
+.perks li {
+  position: relative;
+  padding-left: 26px;
+  font-family: var(--font-body);
+  color: var(--ink);
+}
+.perks li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.42em;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--orange);
+}
+
+/* --- Footer with QR ---------------------------------------------------- */
+.foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: #FFFFFF;
+  border: 2px solid var(--hairline);
+  border-radius: 16px;
+  padding: 10px 10px 8px;
+  box-shadow: 0 6px 20px rgba(33, 26, 18, 0.08);
+}
+.qr img { display: block; border-radius: 6px; }
+.qr span {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.meta {
+  font-family: var(--font-body);
+  font-weight: 600;
+  color: var(--body);
+}

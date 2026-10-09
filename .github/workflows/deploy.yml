@@ -1,0 +1,52 @@
+name: Deploy Shanghai Sound Map
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/soundmap/**"
+      - "scripts/**"
+      - "tests/**"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    # Static checks refuse to deploy on failure — the site never ships
+    # unconfigured, with placeholder keys, or with category drift.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Static checks
+        run: |
+          python tests/check_soundmap.py
+          python tests/check_seed.py
+      - name: Syntax check all python
+        run: python -m py_compile tests/check_*.py scripts/*.py
+
+  deploy:
+    needs: verify
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: src/soundmap
+      - id: deployment
+        uses: actions/deploy-pages@v4

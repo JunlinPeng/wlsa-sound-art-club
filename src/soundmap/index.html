@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A clickable map of Shanghai's sounds, built by the WLSA Sound Art Club. 点击地图，听见上海。">
+  <title>Shanghai Sound Map · 上海声音地图 · WLSA Sound Art Club</title>
+  <link rel="stylesheet" href="css/soundmap.css">
+  <script src="config.js"></script>
+  <script>
+    // AMap security config MUST be set before the map script loads.
+    // (map.js injects https://webapi.amap.com/maps?v=2.0 lazily on first map view.)
+    window._AMapSecurityConfig = {
+      securityJsCode: (window.SOUNDMAP_CONFIG || {}).AMAP_SECURITY_CODE || ''
+    };
+  </script>
+  <script>
+    // View registry bootstrap: the view modules load BEFORE app.js (the router),
+    // so they register into this shared registry and app.js boots it afterwards.
+    window.SoundMap = window.SoundMap || {};
+    window.SoundMap.__views = {};
+    window.SoundMap.registerView = function (name, view) {
+      window.SoundMap.__views[name] = view;
+    };
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content · 跳转到内容</a>
+
+  <header class="topbar">
+    <a class="brand" href="#/" aria-label="Shanghai Sound Map home 上海声音地图首页">
+      <span class="brand-en">Shanghai Sound Map</span>
+      <span class="brand-cn">上海声音地图</span>
+      <span class="brand-sub">WLSA Sound Art Club</span>
+    </a>
+    <nav class="nav" aria-label="Main navigation 主导航">
+      <a href="#/" data-nav="map">Map <span class="nav-cn">地图</span></a>
+      <a href="#/list" data-nav="list">List <span class="nav-cn">列表</span></a>
+      <span class="nav-gap" aria-hidden="true"></span>
+      <a href="#/submit" data-nav="submit" hidden>Submit <span class="nav-cn">投稿</span></a>
+      <a href="#/submissions" data-nav="submissions" hidden>My sounds <span class="nav-cn">我的投稿</span></a>
+      <a href="#/admin" data-nav="admin" hidden>Admin <span class="nav-cn">管理</span></a>
+      <a href="#/pending" data-nav="pending" hidden>Status <span class="nav-cn">审核状态</span></a>
+      <a href="#/login" data-nav="login" hidden>Log in <span class="nav-cn">登录</span></a>
+      <button id="logout-btn" class="nav-btn" type="button" hidden>Log out <span class="nav-cn">退出</span></button>
+    </nav>
+  </header>
+
+  <div id="banner" class="banner" role="alert" hidden>
+    <span id="banner-text"></span>
+    <button id="banner-close" class="banner-close" type="button" aria-label="Dismiss 关闭">✕</button>
+  </div>
+
+  <main id="main"></main>
+
+  <!-- One global player: every Play button on the site feeds this bar. -->
+  <div id="player-bar" class="player-bar" role="region" aria-label="Audio player 音频播放器" hidden>
+    <button id="player-toggle" class="player-toggle" type="button" aria-label="Play 播放">
+      <svg class="icon-play" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+        <path d="M8 5.5v13l11-6.5z" fill="currentColor"></path>
+      </svg>
+      <svg class="icon-pause" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" hidden>
+        <path d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z" fill="currentColor"></path>
+      </svg>
+    </button>
+    <div class="player-info">
+      <div id="player-title" class="player-title"></div>
+      <div id="player-sub" class="player-sub"></div>
+    </div>
+    <audio id="player-audio" controls preload="none"></audio>
+    <a id="player-story" class="player-story" href="#/" hidden>Open story <span class="nav-cn">查看故事</span></a>
+    <button id="player-close" class="player-close" type="button" aria-label="Close player 关闭播放器">✕</button>
+  </div>
+
+  <div id="live-region" class="sr-only" aria-live="polite"></div>
+
+  <script src="vendor/supabase.min.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/list.js"></script>
+  <script src="js/detail.js"></script>
+  <script src="js/wizard.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

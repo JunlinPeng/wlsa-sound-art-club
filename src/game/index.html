@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sound Blind Box · 声音盲盒 — WLSA Sound Art Club</title>
+  <link rel="stylesheet" href="game.css">
+</head>
+<body>
+  <main class="app">
+
+    <!-- HOME -->
+    <section class="screen screen-home is-active">
+      <div class="home">
+        <span class="kicker"><span class="dot"></span>WLSA Sound Art Club</span>
+        <h1>Sound Blind <span class="accent">Box</span>
+          <span class="cn">声音盲盒</span>
+        </h1>
+        <p class="tagline">Can you name that <span class="accent">Shanghai sound</span>?</p>
+        <p class="meta" id="sound-count">Loading…</p>
+        <button class="btn btn-primary" id="start-btn" type="button">Start · 开始</button>
+      </div>
+    </section>
+
+    <!-- GAME -->
+    <section class="screen screen-game">
+      <div class="game-head">
+        <span class="round" id="round">1 / 10</span>
+        <span class="score" id="score"><b>0</b> pts</span>
+      </div>
+      <div class="progress"><div class="bar" id="bar"></div></div>
+
+      <div class="player">
+        <button class="play-btn" id="play-btn" type="button" aria-label="Play sound">
+          <svg viewBox="0 0 44 44"><path d="M16 12 L34 22 L16 32 Z" fill="#FFF9F2"/></svg>
+        </button>
+        <div class="hint">Tap to play · 点击播放</div>
+        <div class="hint-warn"></div>
+      </div>
+
+      <div class="options" id="options"></div>
+    </section>
+
+    <!-- RESULTS -->
+    <section class="screen screen-results">
+      <div class="results">
+        <div class="big" id="big-score">0/10</div>
+        <h2>Your score · 你的成绩</h2>
+        <p class="rank" id="rank"></p>
+        <div class="stamp">⭐ Show this score to collect our club stamp · 凭此成绩领取社团印章</div>
+        <div class="actions">
+          <button class="btn btn-primary" id="again" type="button">Play again · 再来一次</button>
+          <button class="btn btn-ghost" id="home-btn" type="button">Home · 首页</button>
+        </div>
+      </div>
+    </section>
+
+    <footer class="foot">WLSA Sound Art Club · 听见城市声音</footer>
+
+  </main>
+
+  <script src="sounds.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

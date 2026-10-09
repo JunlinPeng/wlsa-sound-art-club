@@ -1,0 +1,324 @@
+/* ==========================================================================
+   WLSA Sound Art Club — "Sound Blind Box" game
+   Guess the city sound. Brand palette + type match the poster / fair cards.
+   ========================================================================== */
+
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: block;
+  src: url('../poster/fonts/fraunces-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Fraunces';
+  font-style: italic;
+  font-weight: 400 700;
+  font-display: block;
+  src: url('../poster/fonts/fraunces-italic.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: block;
+  src: url('../poster/fonts/inter.woff2') format('woff2');
+}
+
+:root {
+  --paper: #FBF6EE;
+  --ink: #211A12;
+  --body: #4A4238;
+  --muted: #8A7F70;
+  --orange: #E8590C;
+  --blue: #0E86C8;
+  --red: #E04028;
+  --green: #2E9E5B;
+  --hairline: rgba(33, 26, 18, 0.14);
+  --card: #FFFFFF;
+
+  --font-display: 'Fraunces', 'Bahnschrift', 'Segoe UI', Georgia, serif;
+  --font-body: 'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  font-family: var(--font-body);
+  color: var(--ink);
+  background:
+    radial-gradient(900px 620px at 92% -4%, rgba(232, 89, 12, 0.10), transparent 60%),
+    radial-gradient(820px 640px at -2% 20%, rgba(14, 134, 200, 0.08), transparent 60%),
+    radial-gradient(900px 760px at 104% 106%, rgba(224, 64, 40, 0.09), transparent 60%),
+    linear-gradient(180deg, #FDF9F1 0%, var(--paper) 55%, #F4ECDD 100%);
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.app {
+  width: 100%;
+  max-width: 720px;
+}
+
+/* --- Screens ----------------------------------------------------------- */
+.screen { display: none; }
+.screen.is-active { display: block; animation: fade .28s ease; }
+@keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* --- Home -------------------------------------------------------------- */
+.home { text-align: center; }
+.home .kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.home .kicker .dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--orange);
+  box-shadow: 0 0 14px 2px rgba(232, 89, 12, 0.4);
+}
+.home h1 {
+  margin-top: 22px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(48px, 9vw, 84px);
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+}
+.home h1 .accent { color: var(--orange); }
+.home .cn {
+  display: block;
+  margin-top: 10px;
+  font-weight: 600;
+  font-size: clamp(20px, 4vw, 30px);
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.home .tagline {
+  margin-top: 18px;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(20px, 4vw, 28px);
+  color: var(--body);
+}
+.home .tagline .accent { color: var(--blue); }
+.home .meta {
+  margin-top: 18px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+/* --- Buttons ----------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-weight: 700;
+  border-radius: 999px;
+  transition: transform .1s ease, box-shadow .2s ease, background .2s ease;
+}
+.btn:active { transform: translateY(2px); }
+
+.btn-primary {
+  margin-top: 34px;
+  background: var(--orange);
+  color: #FFF9F2;
+  font-size: 24px;
+  padding: 20px 52px;
+  box-shadow: 0 10px 34px rgba(232, 89, 12, 0.30);
+}
+.btn-primary:hover { background: #d14e08; }
+
+.btn-ghost {
+  background: var(--card);
+  color: var(--ink);
+  border: 2px solid var(--hairline);
+  font-size: 18px;
+  padding: 14px 34px;
+  box-shadow: 0 6px 20px rgba(33, 26, 18, 0.06);
+}
+.btn-ghost:hover { border-color: var(--orange); }
+
+/* --- Game -------------------------------------------------------------- */
+.game-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+.game-head .round {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.game-head .score {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 26px;
+  color: var(--ink);
+}
+.game-head .score b { color: var(--orange); }
+
+.progress {
+  height: 8px;
+  background: rgba(33, 26, 18, 0.10);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 28px;
+}
+.progress .bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--orange), var(--blue));
+  border-radius: 999px;
+  transition: width .3s ease;
+}
+
+.player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 34px 20px 30px;
+  background: var(--card);
+  border: 2px solid var(--hairline);
+  border-radius: 26px;
+  box-shadow: 0 10px 30px rgba(33, 26, 18, 0.07);
+}
+.play-btn {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  background: var(--orange);
+  color: #FFF9F2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 34px rgba(232, 89, 12, 0.35);
+  transition: transform .12s ease, background .2s ease;
+}
+.play-btn:hover { background: #d14e08; }
+.play-btn:active { transform: scale(0.95); }
+.play-btn.is-playing {
+  background: var(--blue);
+  box-shadow: 0 12px 34px rgba(14, 134, 200, 0.35);
+}
+.play-btn svg { width: 46px; height: 46px; }
+.player .hint {
+  margin-top: 16px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+.player .hint .cn { color: var(--muted); }
+.player .hint-warn {
+  margin-top: 14px;
+  font-size: 14px;
+  color: var(--red);
+  display: none;
+}
+
+/* --- Options ----------------------------------------------------------- */
+.options {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.opt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+  padding: 18px 16px;
+  background: var(--card);
+  border: 2px solid var(--hairline);
+  border-radius: 18px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--ink);
+  transition: transform .1s ease, border-color .2s ease, background .2s ease;
+}
+.opt:hover:not(:disabled) { border-color: var(--orange); transform: translateY(-2px); }
+.opt .cn { display: block; font-size: 15px; font-weight: 500; color: var(--muted); }
+.opt:disabled { cursor: default; }
+.opt.is-correct { background: #EAF7EF; border-color: var(--green); color: #1C6B3B; }
+.opt.is-correct .cn { color: #2E9E5B; }
+.opt.is-wrong { background: #FDEEEC; border-color: var(--red); color: #A52A1A; }
+.opt.is-wrong .cn { color: var(--red); }
+.opt.is-dimmed { opacity: 0.45; }
+
+/* --- Results ----------------------------------------------------------- */
+.results { text-align: center; }
+.results .big {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(72px, 14vw, 130px);
+  line-height: 1;
+  color: var(--orange);
+}
+.results h2 {
+  margin-top: 14px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(28px, 5vw, 40px);
+}
+.results .rank {
+  margin-top: 14px;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 22px;
+  color: var(--body);
+}
+.results .stamp {
+  margin-top: 26px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--card);
+  border: 2px dashed var(--orange);
+  border-radius: 16px;
+  padding: 16px 22px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--body);
+}
+.results .actions { margin-top: 28px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+/* --- Footer ------------------------------------------------------------ */
+.foot {
+  margin-top: 26px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+@media (max-width: 560px) {
+  .options { grid-template-columns: 1fr; }
+}

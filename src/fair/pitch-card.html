@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>WLSA Sound Art Club — Pitch Card</title>
+  <link rel="stylesheet" href="fair.css">
+  <style>
+    html, body { width: 397px; height: 559px; }   /* A6 portrait @ 96 dpi */
+
+    .card { padding: 32px 32px 26px; }
+
+    .kicker { font-size: 12px; letter-spacing: 0.18em; }
+    .kicker .mark { width: 24px; height: 24px; }
+
+    .title {
+      margin-top: 20px;
+      font-size: 40px;
+      line-height: 1.02;
+    }
+    .title .sub {
+      display: block;
+      margin-top: 8px;
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .tagline {
+      margin-top: 14px;
+      font-size: 25px;
+      line-height: 1.12;
+    }
+
+    .perks { margin-top: 24px; display: flex; flex-direction: column; gap: 13px; }
+    .perks li { font-size: 15px; line-height: 1.35; }
+
+    .foot { margin-top: auto; padding-top: 18px; }
+    .qr img { width: 64px; height: 64px; }
+    .meta { font-size: 13px; line-height: 1.45; }
+    .meta .accent { font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div class="card">
+
+    <div class="kicker">
+      <span class="mark" aria-hidden="true">
+        <svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="21" fill="#E8590C"/><path d="M18 14 L30 22 L18 30 Z" fill="#FFF9F2"/></svg>
+      </span>
+      <span>WLSA Sound Art Club</span>
+    </div>
+
+    <h1 class="title">Hear the city.<br>Save its <span class="accent">memory</span>.
+      <span class="sub">Community service &middot; sound archive</span>
+    </h1>
+
+    <ul class="perks">
+      <li>Learn audio recording &amp; editing.</li>
+      <li>Real interviews, dubbing &amp; voice work.</li>
+      <li>Community service: help blind children &ldquo;see&rdquo; through sound.</li>
+      <li>Founding members &rarr; leadership roles + red envelope.</li>
+      <li>No prerequisites &mdash; just curiosity.</li>
+    </ul>
+
+    <div class="foot">
+      <div class="meta">
+        <span class="accent">Thursdays</span><br>
+        Supervisor: Bruce Li
+      </div>
+      <div class="qr">
+        <img src="../poster/qr.png" alt="Scan to join the WLSA Sound Art Club">
+        <span>Scan to join</span>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

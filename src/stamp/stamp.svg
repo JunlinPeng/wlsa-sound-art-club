@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="20mm" height="20mm" viewBox="0 0 200 200" role="img" aria-label="WLSA Sound Art Club stamp">
+  <!-- 2 cm circular club stamp. Single ink color (brand orange #E8590C — not gold). -->
+  <!-- Outer ring -->
+  <circle cx="100" cy="100" r="93" fill="none" stroke="#E8590C" stroke-width="13" />
+
+  <!-- Headphones: bold, simplified mark — legible at 2 cm -->
+  <!-- Headband -->
+  <path d="M62 92 A 38 38 0 0 1 138 92" fill="none" stroke="#E8590C" stroke-width="18" stroke-linecap="round" />
+  <!-- Left ear cup -->
+  <rect x="44" y="84" width="36" height="56" rx="16" fill="#E8590C" />
+  <!-- Right ear cup -->
+  <rect x="120" y="84" width="36" height="56" rx="16" fill="#E8590C" />
+</svg>

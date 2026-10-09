@@ -1,0 +1,493 @@
+{
+  "categories": {
+    "transport": {
+      "en": "Transport",
+      "cn": "交通"
+    },
+    "cries": {
+      "en": "Street Cries",
+      "cn": "叫卖"
+    },
+    "market": {
+      "en": "Market & Food",
+      "cn": "市场"
+    },
+    "nature": {
+      "en": "Water & Nature",
+      "cn": "水与自然"
+    },
+    "neighborhood": {
+      "en": "Neighborhood",
+      "cn": "里弄"
+    },
+    "festival": {
+      "en": "Festival",
+      "cn": "节庆"
+    },
+    "daily": {
+      "en": "Daily City",
+      "cn": "日常"
+    },
+    "crafts": {
+      "en": "Crafts",
+      "cn": "手艺"
+    }
+  },
+  "sounds": [
+    {
+      "id": 1,
+      "en": "Ferry horn",
+      "cn": "轮渡汽笛",
+      "category": "transport",
+      "query": "ferry horn"
+    },
+    {
+      "id": 2,
+      "en": "Subway doors",
+      "cn": "地铁车门提示音",
+      "category": "transport",
+      "query": "subway doors"
+    },
+    {
+      "id": 3,
+      "en": "Bicycle bell",
+      "cn": "自行车铃",
+      "category": "transport",
+      "query": "bicycle bell"
+    },
+    {
+      "id": 4,
+      "en": "Train horn",
+      "cn": "火车汽笛",
+      "category": "transport",
+      "query": "train horn"
+    },
+    {
+      "id": 5,
+      "en": "Ship horn",
+      "cn": "轮船汽笛",
+      "category": "transport",
+      "query": "ship horn"
+    },
+    {
+      "id": 6,
+      "en": "Scooter horn",
+      "cn": "电瓶车喇叭",
+      "category": "transport",
+      "query": "moped horn"
+    },
+    {
+      "id": 7,
+      "en": "Metro announcement",
+      "cn": "地铁报站",
+      "category": "transport",
+      "query": "metro announcement"
+    },
+    {
+      "id": 8,
+      "en": "Airplane flyover",
+      "cn": "飞机掠过",
+      "category": "transport",
+      "query": "airplane flyover"
+    },
+    {
+      "id": 9,
+      "en": "Tram bell",
+      "cn": "有轨电车铃",
+      "category": "transport",
+      "query": "tram bell"
+    },
+    {
+      "id": 10,
+      "en": "Knife grinder",
+      "cn": "磨刀剪子",
+      "category": "cries",
+      "query": "knife sharpening"
+    },
+    {
+      "id": 11,
+      "en": "Recycling collector",
+      "cn": "收废品吆喝",
+      "category": "cries",
+      "query": "street vendor shouting"
+    },
+    {
+      "id": 12,
+      "en": "Popcorn popping",
+      "cn": "爆米花出锅",
+      "category": "cries",
+      "query": "popcorn popping"
+    },
+    {
+      "id": 13,
+      "en": "Roasted chestnuts",
+      "cn": "糖炒栗子",
+      "category": "cries",
+      "query": "roasting chestnuts"
+    },
+    {
+      "id": 14,
+      "en": "Hand-bell hawker",
+      "cn": "摇铃叫卖",
+      "category": "cries",
+      "query": "hand bell"
+    },
+    {
+      "id": 15,
+      "en": "Barber's clippers",
+      "cn": "剃头推子",
+      "category": "cries",
+      "query": "hair clippers"
+    },
+    {
+      "id": 16,
+      "en": "Shoe repair",
+      "cn": "修鞋敲打",
+      "category": "cries",
+      "query": "hammering nail"
+    },
+    {
+      "id": 17,
+      "en": "Wet market",
+      "cn": "菜市场嘈杂",
+      "category": "market",
+      "query": "market ambience"
+    },
+    {
+      "id": 18,
+      "en": "Wok sizzle",
+      "cn": "炒菜下锅",
+      "category": "market",
+      "query": "wok sizzle"
+    },
+    {
+      "id": 19,
+      "en": "Butcher chopping",
+      "cn": "剁肉",
+      "category": "market",
+      "query": "chopping vegetables"
+    },
+    {
+      "id": 20,
+      "en": "Griddle sizzle",
+      "cn": "煎饼摊",
+      "category": "market",
+      "query": "sizzling pan"
+    },
+    {
+      "id": 21,
+      "en": "Steamer hiss",
+      "cn": "包子蒸笼",
+      "category": "market",
+      "query": "steam hiss"
+    },
+    {
+      "id": 22,
+      "en": "Cash register",
+      "cn": "收银机",
+      "category": "market",
+      "query": "cash register drawer"
+    },
+    {
+      "id": 23,
+      "en": "Fish market",
+      "cn": "鱼市",
+      "category": "market",
+      "query": "fish market"
+    },
+    {
+      "id": 24,
+      "en": "Scale beep",
+      "cn": "电子秤",
+      "category": "market",
+      "query": "supermarket scanner beep"
+    },
+    {
+      "id": 25,
+      "en": "Pouring tea",
+      "cn": "倒茶",
+      "category": "market",
+      "query": "pouring tea"
+    },
+    {
+      "id": 26,
+      "en": "River tide",
+      "cn": "黄浦江潮水",
+      "category": "nature",
+      "query": "river water flowing"
+    },
+    {
+      "id": 27,
+      "en": "Wetland birds",
+      "cn": "湿地候鸟",
+      "category": "nature",
+      "query": "wetland birds"
+    },
+    {
+      "id": 28,
+      "en": "Cicadas",
+      "cn": "蝉鸣",
+      "category": "nature",
+      "query": "cicada"
+    },
+    {
+      "id": 29,
+      "en": "Rain on roof",
+      "cn": "雨打屋顶",
+      "category": "nature",
+      "query": "rain on roof"
+    },
+    {
+      "id": 30,
+      "en": "Thunder",
+      "cn": "雷声",
+      "category": "nature",
+      "query": "thunder"
+    },
+    {
+      "id": 31,
+      "en": "Frogs",
+      "cn": "蛙鸣",
+      "category": "nature",
+      "query": "frogs croaking"
+    },
+    {
+      "id": 32,
+      "en": "Park birds",
+      "cn": "公园鸟鸣",
+      "category": "nature",
+      "query": "park birdsong"
+    },
+    {
+      "id": 33,
+      "en": "Wind in trees",
+      "cn": "风吹树叶",
+      "category": "nature",
+      "query": "wind rustling leaves"
+    },
+    {
+      "id": 34,
+      "en": "Mahjong tiles",
+      "cn": "麻将洗牌",
+      "category": "neighborhood",
+      "query": "mahjong tiles"
+    },
+    {
+      "id": 35,
+      "en": "Doorbell",
+      "cn": "门铃",
+      "category": "neighborhood",
+      "query": "doorbell"
+    },
+    {
+      "id": 36,
+      "en": "Creaky stairs",
+      "cn": "木楼梯吱呀",
+      "category": "neighborhood",
+      "query": "creaking stairs"
+    },
+    {
+      "id": 37,
+      "en": "Sewing machine",
+      "cn": "缝纫机",
+      "category": "neighborhood",
+      "query": "sewing machine stitching"
+    },
+    {
+      "id": 38,
+      "en": "Pipa (pingtan)",
+      "cn": "评弹琵琶",
+      "category": "neighborhood",
+      "query": "pipa"
+    },
+    {
+      "id": 39,
+      "en": "Cricket chirp",
+      "cn": "蛐蛐",
+      "category": "neighborhood",
+      "query": "cricket chirp"
+    },
+    {
+      "id": 40,
+      "en": "Abacus",
+      "cn": "算盘",
+      "category": "neighborhood",
+      "query": "clicking beads"
+    },
+    {
+      "id": 41,
+      "en": "Neighbor chatter",
+      "cn": "邻里闲聊",
+      "category": "neighborhood",
+      "query": "cafe ambience"
+    },
+    {
+      "id": 42,
+      "en": "Fireworks",
+      "cn": "烟花",
+      "category": "festival",
+      "query": "fireworks crackle"
+    },
+    {
+      "id": 43,
+      "en": "Firecrackers",
+      "cn": "鞭炮",
+      "category": "festival",
+      "query": "firecrackers"
+    },
+    {
+      "id": 44,
+      "en": "Temple bell",
+      "cn": "寺庙钟声",
+      "category": "festival",
+      "query": "temple bell"
+    },
+    {
+      "id": 45,
+      "en": "Lion dance drum",
+      "cn": "舞狮鼓",
+      "category": "festival",
+      "query": "taiko drum"
+    },
+    {
+      "id": 46,
+      "en": "Suona",
+      "cn": "唢呐",
+      "category": "festival",
+      "query": "suona"
+    },
+    {
+      "id": 47,
+      "en": "Gong",
+      "cn": "铜锣",
+      "category": "festival",
+      "query": "tam tam gong"
+    },
+    {
+      "id": 48,
+      "en": "Cymbals",
+      "cn": "钹",
+      "category": "festival",
+      "query": "crash cymbal"
+    },
+    {
+      "id": 49,
+      "en": "Erhu",
+      "cn": "二胡",
+      "category": "festival",
+      "query": "erhu solo"
+    },
+    {
+      "id": 50,
+      "en": "Old telephone ring",
+      "cn": "老式电话铃",
+      "category": "daily",
+      "query": "old telephone ring"
+    },
+    {
+      "id": 51,
+      "en": "Elevator ding",
+      "cn": "电梯叮咚",
+      "category": "daily",
+      "query": "elevator chime"
+    },
+    {
+      "id": 52,
+      "en": "Ambulance siren",
+      "cn": "救护车",
+      "category": "daily",
+      "query": "ambulance siren"
+    },
+    {
+      "id": 53,
+      "en": "Street sweeper",
+      "cn": "洒水车",
+      "category": "daily",
+      "query": "road sweeper"
+    },
+    {
+      "id": 54,
+      "en": "Construction hammering",
+      "cn": "工地敲打",
+      "category": "daily",
+      "query": "jackhammer"
+    },
+    {
+      "id": 55,
+      "en": "School bell",
+      "cn": "学校铃声",
+      "category": "daily",
+      "query": "school bell"
+    },
+    {
+      "id": 56,
+      "en": "Fountain",
+      "cn": "喷泉",
+      "category": "daily",
+      "query": "fountain"
+    },
+    {
+      "id": 57,
+      "en": "Dog barking",
+      "cn": "犬吠",
+      "category": "daily",
+      "query": "dog barking"
+    },
+    {
+      "id": 58,
+      "en": "Clock chime",
+      "cn": "报时钟",
+      "category": "daily",
+      "query": "clock chime"
+    },
+    {
+      "id": 59,
+      "en": "Carpenter sawing",
+      "cn": "木匠锯木",
+      "category": "crafts",
+      "query": "hand saw"
+    },
+    {
+      "id": 60,
+      "en": "Blacksmith hammer",
+      "cn": "打铁",
+      "category": "crafts",
+      "query": "blacksmith hammering"
+    },
+    {
+      "id": 61,
+      "en": "Stone mill",
+      "cn": "石磨",
+      "category": "crafts",
+      "query": "grinding stone"
+    },
+    {
+      "id": 62,
+      "en": "Loom weaving",
+      "cn": "织布机",
+      "category": "crafts",
+      "query": "weaving loom"
+    },
+    {
+      "id": 63,
+      "en": "Wooden fish",
+      "cn": "木鱼",
+      "category": "crafts",
+      "query": "woodblock"
+    },
+    {
+      "id": 64,
+      "en": "Typewriter",
+      "cn": "老式打字机",
+      "category": "crafts",
+      "query": "typewriter"
+    },
+    {
+      "id": 65,
+      "en": "Bellows",
+      "cn": "风箱",
+      "category": "crafts",
+      "query": "air bellows"
+    }
+  ]
+}

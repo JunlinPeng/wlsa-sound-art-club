@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>WLSA Sound Art Club — Sound Blind Box (game card)</title>
+  <link rel="stylesheet" href="fair.css">
+  <style>
+    html, body { width: 559px; height: 794px; }   /* A5 portrait @ 96 dpi */
+
+    .card { padding: 40px 40px 34px; }
+
+    .kicker { font-size: 15px; }
+
+    .title {
+      margin-top: 22px;
+      font-size: 54px;
+    }
+    .title .cn {
+      margin-top: 8px;
+      font-size: 27px;
+      color: var(--muted);
+    }
+
+    .tagline {
+      margin-top: 14px;
+      font-size: 25px;
+      line-height: 1.15;
+    }
+
+    .steps { margin-top: 28px; display: flex; flex-direction: column; gap: 15px; }
+    .steps .num { width: 34px; height: 34px; font-size: 18px; }
+    .steps .txt { font-size: 22px; line-height: 1.25; padding-top: 4px; }
+
+    .prize {
+      margin-top: 26px;
+      padding: 16px 22px;
+      font-size: 22px;
+      line-height: 1.25;
+    }
+
+    .chips { margin-top: 22px; }
+    .chip { font-size: 15px; padding: 8px 15px; }
+
+    .foot { margin-top: auto; padding-top: 22px; }
+    .foot .join {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 30px;
+    }
+    .foot .join .arrow { color: var(--orange); }
+    .qr img { width: 86px; height: 86px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+
+    <div class="kicker">
+      <span class="mark" aria-hidden="true">
+        <svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="21" fill="#E8590C"/><path d="M18 14 L30 22 L18 30 Z" fill="#FFF9F2"/></svg>
+      </span>
+      <span>WLSA Sound Art Club</span>
+    </div>
+
+    <h1 class="title">Sound Blind <span class="blue">Box</span>
+      <span class="cn">声音盲盒</span>
+    </h1>
+
+    <p class="tagline">Can you name that <span class="accent">Shanghai sound</span>?</p>
+
+    <ol class="steps">
+      <li><span class="num">1</span><span class="txt">Put on the headphones.</span></li>
+      <li><span class="num">2</span><span class="txt">Listen to a mystery city sound.</span></li>
+      <li><span class="num">3</span><span class="txt">Guess what &amp; where it is.</span></li>
+    </ol>
+
+    <div class="prize">Guess 2 of 3 &rarr; collect our stamp + a prize.</div>
+
+    <div class="chips">
+      <span class="chip">ferry horn</span>
+      <span class="chip">street vendor&rsquo;s cry</span>
+      <span class="chip">morning market</span>
+      <span class="chip">Shikumen alley</span>
+      <span class="chip">subway doors</span>
+    </div>
+
+    <div class="foot">
+      <div class="join">Join us <span class="arrow">&rarr;</span></div>
+      <div class="qr">
+        <img src="../poster/qr.png" alt="Scan to join the WLSA Sound Art Club">
+        <span>Scan to join</span>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

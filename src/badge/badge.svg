@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1600" viewBox="0 0 400 400" role="img" aria-label="WLSA Sound Art Club badge">
+  <style>
+    @font-face {
+      font-family: 'Inter';
+      font-style: normal;
+      font-weight: 400 700;
+      src: url('../poster/fonts/inter.woff2') format('woff2');
+    }
+    .ring-text { font-family: 'Inter', 'Segoe UI', Arial, sans-serif; font-weight: 700; }
+  </style>
+  <defs>
+    <!-- Top arc for the curved club name (left -> right, over the top). -->
+    <path id="topArc" d="M 60 200 A 140 140 0 0 1 340 200" />
+  </defs>
+
+  <!-- Badge disc: cream fill + dark outer ring -->
+  <circle cx="200" cy="200" r="196" fill="#FBF6EE" stroke="#211A12" stroke-width="6" />
+  <!-- Inner accent ring -->
+  <circle cx="200" cy="200" r="180" fill="none" stroke="#E8590C" stroke-width="3" />
+
+  <!-- Club name, curved along the top -->
+  <text class="ring-text" font-size="30" letter-spacing="0.12em" fill="#211A12">
+    <textPath href="#topArc" startOffset="50%" text-anchor="middle">WLSA SOUND ART CLUB</textPath>
+  </text>
+
+  <!-- Headphones icon (orange) -->
+  <path d="M 136 202 A 64 64 0 0 1 264 202" fill="none" stroke="#E8590C" stroke-width="20" stroke-linecap="round" />
+  <rect x="112" y="198" width="48" height="76" rx="20" fill="#E8590C" />
+  <rect x="240" y="198" width="48" height="76" rx="20" fill="#E8590C" />
+
+  <!-- Decorative dots to balance the bottom -->
+  <circle cx="101" cy="299" r="5" fill="#E8590C" />
+  <circle cx="200" cy="340" r="5" fill="#E8590C" />
+  <circle cx="299" cy="299" r="5" fill="#E8590C" />
+</svg>

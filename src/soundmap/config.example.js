@@ -13,7 +13,9 @@ window.SOUNDMAP_CONFIG = {
   AMAP_KEY: 'YOUR_AMAP_KEY',
   // The 安全密钥 shown next to the key (mandatory for keys issued after 2021-12)
   AMAP_SECURITY_CODE: 'YOUR_AMAP_SECURITY_CODE',
-  // Supabase dashboard -> project -> Settings -> API
+  // Supabase dashboard -> gear (Project Settings) -> Data API -> Project URL.
+  // BARE origin only — no trailing slash, no /rest/v1/ (supabase-js appends
+  // /rest/v1/ itself; including it yields https://host/rest/v1//rest/v1/...)
   SUPABASE_URL: 'https://YOUR-PROJECT.supabase.co',
   SUPABASE_ANON_KEY: 'YOUR_SUPABASE_ANON_KEY'
 };

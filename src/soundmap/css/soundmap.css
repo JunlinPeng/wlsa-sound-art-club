@@ -50,6 +50,15 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+/* The `hidden` attribute is this app's only show/hide mechanism — JS toggles it
+   everywhere. But it works through a USER-AGENT rule (`[hidden]{display:none}`),
+   which loses to any author `display` declaration. Every card, banner and the
+   player bar in this file sets display (flex/grid), so each one painted straight
+   over its own hidden attribute: a hidden "map could not load" card sat on top
+   of a perfectly working map, and a hidden player bar was always on screen.
+   Re-assert it here with !important so the attribute always wins. */
+[hidden] { display: none !important; }
+
 html, body { height: 100%; }
 
 body {

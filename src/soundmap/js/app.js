@@ -267,8 +267,32 @@
 
   /* ------------------------------------------------------------------ auth -- */
 
-  async function refreshAuth() {
-    if (!sb) { updateNav(); route(); return; }
+  /* True once a view has been rendered — the first refreshAuth() is what paints
+     the initial screen, so that one must always route. */
+  var hasRendered = false;
+
+  /* Re-reads the session and re-renders — but only when the person in front of
+     the screen actually changed.
+
+     supabase-js re-emits SIGNED_IN for the SAME user whenever the tab regains
+     focus: the visibilitychange handler runs _recoverAndRefresh, which ends in
+     _notifyAllSubscribers("SIGNED_IN", session). Our handler below already
+     swallows TOKEN_REFRESHED for exactly this reason, but not SIGNED_IN — so a
+     student switching to their recorder or the file picker and coming back threw
+     away the half-filled submit wizard, whose state lives in the render closure
+     and cannot survive a re-render. Work was lost mid-submission, repeatedly.
+
+     updateNav() still runs on every call, so nav links stay correct without
+     rebuilding the view the user is typing into. */
+  async function refreshAuth(force) {
+    var prevUserId = state.user ? state.user.id : null;
+    if (!sb) {
+      state.user = null;
+      state.profile = null;
+      updateNav();
+      if (force || !hasRendered) { hasRendered = true; route(); }
+      return;
+    }
     var res = await sb.auth.getSession();
     state.user = (res.data && res.data.session) ? res.data.session.user : null;
     state.profile = null;
@@ -278,7 +302,11 @@
     }
     updateNav();
     window.dispatchEvent(new CustomEvent('soundmap:auth'));
-    route();
+    var nextUserId = state.user ? state.user.id : null;
+    if (force || !hasRendered || nextUserId !== prevUserId) {
+      hasRendered = true;
+      route();
+    }
   }
 
   /* ------------------------------------------------------- global actions -- */

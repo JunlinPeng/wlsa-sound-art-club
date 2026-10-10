@@ -344,7 +344,17 @@ create policy "profiles delete admin" on public.profiles
 -- RLS policies: storage.objects (bucket 'audio' only — policies are per-object
 -- and must re-check bucket_id)
 -- ----------------------------------------------------------------------------
-alter table storage.objects enable row level security;
+-- NOTE: we do NOT run `alter table storage.objects enable row level security`
+-- here. That table is owned by supabase_storage_admin, so the `postgres` role
+-- the SQL Editor runs as gets "42501: must be owner of table objects" — and
+-- Supabase already enables RLS on storage.objects by default, so the statement
+-- is unnecessary anyway. The policies below are what actually matter.
+--
+-- NOTE: every ownership check below casts `auth.uid()::text`. Supabase declares
+-- storage.objects.owner_id as TEXT while auth.uid() returns UUID, and Postgres
+-- has no implicit uuid = text operator — omitting the cast fails policy creation
+-- with "42883: operator does not exist: text = uuid". Cast the uid, never the
+-- column: casting a column that might hold a non-uuid value would raise instead.
 
 drop policy if exists "audio select approved or own" on storage.objects;
 create policy "audio select approved or own" on storage.objects
@@ -353,7 +363,7 @@ create policy "audio select approved or own" on storage.objects
     bucket_id = 'audio'
     and (
       (storage.foldername(name))[1] = 'approved'
-      or owner_id = auth.uid()
+      or owner_id = auth.uid()::text
       or public.is_admin()  -- admins preview pending/rejected audio for review
     )
   );
@@ -389,13 +399,13 @@ create policy "audio insert own pending or admin" on storage.objects
 drop policy if exists "audio update own or admin" on storage.objects;
 create policy "audio update own or admin" on storage.objects
   for update
-  using (bucket_id = 'audio' and (owner_id = auth.uid() or public.is_admin()))
+  using (bucket_id = 'audio' and (owner_id = auth.uid()::text or public.is_admin()))
   with check (
     bucket_id = 'audio'
     and (
       public.is_admin()
       or (
-        owner_id = auth.uid()
+        owner_id = auth.uid()::text
         -- Non-admin owners may only rename their own object WITHIN pending/ —
         -- this blocks a move/update that smuggles unapproved audio into the
         -- publicly readable approved/ folder, whichever storage backend
@@ -413,7 +423,7 @@ create policy "audio delete own or admin" on storage.objects
     and (
       public.is_admin()
       or (
-        owner_id = auth.uid()
+        owner_id = auth.uid()::text
         -- Members own their uploads forever (owner_id never changes), but once
         -- an object is approved and moved to approved/ it is a published club
         -- asset — only admins may remove it there.

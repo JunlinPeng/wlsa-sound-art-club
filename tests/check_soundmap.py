@@ -142,6 +142,17 @@ def main() -> int:
         check("brand palette hexes are used in soundmap.css", not missing,
               "missing " + ", ".join(missing))
 
+        # The `hidden` attribute is the app's whole show/hide mechanism, and it
+        # only works through a USER-AGENT rule that any author `display` beats.
+        # Without this guard every card, banner and the player bar paints over
+        # its own hidden attribute — a hidden "map could not load" card once sat
+        # on top of a working map for days, invisible to every other check here
+        # (they looked at the attribute, which was correctly set).
+        hidden_rule = re.search(r"\[hidden\][^{]*\{[^}]*display\s*:\s*none\s*!important", body)
+        check("soundmap.css forces [hidden] to win over author display rules",
+              bool(hidden_rule),
+              "add `[hidden] { display: none !important; }` to soundmap.css")
+
     # --------------------------------------------------- category sync check --
     appjs = SRC / "js" / "app.js"
     game_data = ROOT / "src" / "game" / "data" / "sounds.json"

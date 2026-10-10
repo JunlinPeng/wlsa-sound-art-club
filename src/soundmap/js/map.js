@@ -22,9 +22,14 @@
       if (window.AMap) { resolve(window.AMap); return; }
 
       var done = false;
+      // Generous watchdog. The AMap bundle is ~1 MB and the map data is a
+      // further round of requests, so a tight deadline fails on slow networks
+      // and discards a map that was still loading. 4 s proved too short in
+      // practice; genuine network failures are reported by script.onerror
+      // below, which fails fast, so this only needs to catch a hang.
       var timer = setTimeout(function () {
         if (!done) { done = true; amapPromise = null; reject(new Error('AMAP_TIMEOUT')); }
-      }, 4000);
+      }, 20000);
 
       var script = document.createElement('script');
       script.src = 'https://webapi.amap.com/maps?v=2.0&key=' + encodeURIComponent(S.CFG.AMAP_KEY || '')
@@ -198,6 +203,9 @@
           'The site is not configured yet — fill in config.js (see playbooks/launch-soundmap.md). 网站尚未配置，请先填写 config.js。';
         return;
       }
+      // Non-blocking hint while the bundle and map data load. AMap replaces the
+      // container's contents when it renders, so this never lingers on success.
+      container.textContent = 'Loading the map… 正在加载地图…';
       try {
         var AMap = await loadAMap();
         if (destroyed) return;
@@ -212,6 +220,13 @@
         refresh();
       } catch (err) {
         if (destroyed) return;
+        // The banner is deliberately generic — visitors get one calm bilingual
+        // message and a working list. But the failure modes need very different
+        // fixes: AMAP_NETWORK (webapi.amap.com unreachable from this network),
+        // AMAP_TIMEOUT (bundle too slow for the watchdog), AMAP_KEY_INVALID
+        // (key or securityJsCode rejected). Log the code so that a report of
+        // "the map failed" is actually diagnosable instead of a guess.
+        console.error('[soundmap] map load failed:', (err && err.message) || err);
         fallbackEl.hidden = false;
         S.showBanner('The map could not load — switching to the list. 地图加载失败，已切换到列表模式。', 'error');
         setTimeout(function () {

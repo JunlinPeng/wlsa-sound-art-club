@@ -70,6 +70,60 @@
     }).join('') + '</select>';
   }
 
+  /* --------------------------------------------------------------- draft --- */
+  /* Every field of the wizard lives in the render closure, so ANY re-render —
+     a re-route, a sign-out, the tab coming back, the student clicking Map and
+     returning — used to throw the whole submission away. A 20 MB recording plus
+     a story and a Chinese audio description is a lot of work to lose to a
+     re-render the student never asked for.
+
+     Text is kept in localStorage, keyed per user so a shared school laptop
+     never shows one student another's draft. The chosen File is deliberately
+     not kept: it cannot be serialised, it is megabytes, and a restored draft
+     therefore asks for the recording to be picked again. */
+  var DRAFT_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
+
+  function draftKey() {
+    return (S.state.user && S.state.user.id) ? 'soundmap:draft:' + S.state.user.id : null;
+  }
+
+  /* Fields worth restoring — an untouched form must not look like a draft. */
+  var DRAFT_FIELDS = ['title_en', 'title_cn', 'place_cn', 'story_cn', 'story_en',
+    'transcript_cn', 'audio_description_cn', 'dialect_text'];
+
+  function draftHasContent(d) {
+    return DRAFT_FIELDS.some(function (k) { return d && d[k] && String(d[k]).trim(); });
+  }
+
+  function saveDraft(w) {
+    var key = draftKey();
+    if (!key || w.mode !== 'create' || w.saving) return;
+    try {
+      localStorage.setItem(key, JSON.stringify({
+        step: w.step, hadFile: !!w.file, data: w.data, savedAt: Date.now()
+      }));
+    } catch (e) { /* private mode or quota — a missing safety copy is not fatal */ }
+  }
+
+  function loadDraft() {
+    var key = draftKey();
+    if (!key) return null;
+    try {
+      var raw = localStorage.getItem(key);
+      if (!raw) return null;
+      var d = JSON.parse(raw);
+      if (!d || !d.data || typeof d.data !== 'object') return null;
+      if (Date.now() - (d.savedAt || 0) > DRAFT_MAX_AGE) { localStorage.removeItem(key); return null; }
+      return d;
+    } catch (e) { return null; }
+  }
+
+  function clearDraft() {
+    var key = draftKey();
+    if (!key) return;
+    try { localStorage.removeItem(key); } catch (e) { /* ignore */ }
+  }
+
   /* ------------------------------------------------------------ step HTML -- */
 
   function step1Html(w) {
@@ -184,6 +238,22 @@
       }
     };
 
+    /* Restore before the first renderStep(), so the fields paint with the
+       student's text already in them. Edit mode has a real row to work from
+       and never touches the draft. */
+    var restored = null;
+    if (w.mode === 'create') {
+      var d = loadDraft();
+      if (d && draftHasContent(d.data)) {
+        Object.assign(w.data, d.data);
+        /* The recording cannot be carried across, so a draft from mid-flow goes
+           back to step 1 for the file and walks forward again — every answer is
+           still filled in. */
+        w.step = d.hadFile ? 0 : (typeof d.step === 'number' ? d.step : 0);
+        restored = d;
+      }
+    }
+
     el.innerHTML =
       '<div class="view-content">'
       + '<h1 class="view-title" id="w-title">' + (w.mode === 'edit' ? 'Edit sound · 编辑声音' : 'Add a sound · 添加声音') + '</h1>'
@@ -208,6 +278,22 @@
       window.scrollTo(0, 0);
     });
     el.querySelector('#w-next').addEventListener('click', next);
+
+    /* Autosave on every edit, not just on Next — a field the student typed but
+       never advanced past is exactly the work worth keeping. #main is reused by
+       every view, so these must be removed in destroy() or they would pile up
+       and keep saving a stale `w` from a wizard that is long gone. */
+    function onEdit() { captureFields(); saveDraft(w); }
+    el.addEventListener('input', onEdit);
+    el.addEventListener('change', onEdit);
+
+    /* A tab switch is both when this matters most and when supabase-js re-reads
+       the session, so capture on the way out as well. */
+    function captureNow() { captureFields(); saveDraft(w); }
+    function onVisibility() { if (document.hidden) captureNow(); }
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('pagehide', captureNow);
+    window.addEventListener('beforeunload', captureNow);
 
     /* ------------------------------ edit mode: load the row and pre-fill ---- */
 
@@ -400,16 +486,40 @@
 
     /* ------------------------------ validation ---------------------------- */
 
+    /* Reads whichever step is on screen into w.data. Shared by Next and by the
+       draft autosave, so the two can never disagree about what was captured.
+       Step 2 needs no reading here: setupStep2's own listeners keep w.data live
+       whether the student picks on the map, drags the pin, or types coords. */
+    function captureFields() {
+      var stepEl = el.querySelector('#w-step');
+      if (!stepEl) return;
+      var d = w.data;
+      var e;
+      if (w.step === 0) {
+        if ((e = stepEl.querySelector('#w-title-en'))) d.title_en = e.value.trim();
+        if ((e = stepEl.querySelector('#w-title-cn'))) d.title_cn = e.value.trim();
+        if ((e = stepEl.querySelector('#w-category'))) d.category = e.value;
+        if ((e = stepEl.querySelector('#w-time'))) d.time_of_day = e.value;
+        if ((e = stepEl.querySelector('#w-date'))) d.recorded_on = e.value;
+      } else if (w.step === 2) {
+        if ((e = stepEl.querySelector('#w-story-cn'))) d.story_cn = e.value.trim();
+        if ((e = stepEl.querySelector('#w-story-en'))) d.story_en = e.value.trim();
+        if ((e = stepEl.querySelector('#w-transcript'))) d.transcript_cn = e.value.trim();
+        if ((e = stepEl.querySelector('#w-dialect-name'))) d.dialect_name = e.value.trim();
+        if ((e = stepEl.querySelector('#w-dialect-text'))) d.dialect_text = e.value.trim();
+        if ((e = stepEl.querySelector('#w-dialect-note'))) d.dialect_note = e.value.trim();
+        if ((e = stepEl.querySelector('#w-ad-cn'))) d.audio_description_cn = e.value.trim();
+        if ((e = stepEl.querySelector('#w-ad-en'))) d.audio_description_en = e.value.trim();
+        if ((e = stepEl.querySelector('#w-recorder'))) d.recorder_name = e.value.trim();
+        if ((e = stepEl.querySelector('#w-license'))) d.license = e.value;
+      }
+    }
+
     function next() {
       if (w.saving) return;
       var err = null;
-      var stepEl = el.querySelector('#w-step');
+      captureFields();
       if (w.step === 0) {
-        w.data.title_en = stepEl.querySelector('#w-title-en').value.trim();
-        w.data.title_cn = stepEl.querySelector('#w-title-cn').value.trim();
-        w.data.category = stepEl.querySelector('#w-category').value;
-        w.data.time_of_day = stepEl.querySelector('#w-time').value;
-        w.data.recorded_on = stepEl.querySelector('#w-date').value;
         if (w.mode === 'create' && !w.file) err = 'Choose an audio file. 请选择音频文件。';
         else if (!w.data.title_en || !w.data.title_cn) err = 'Both titles are required. 请填写中英文标题。';
         else if (!w.data.recorded_on) err = 'Pick the recording date. 请选择录音日期。';
@@ -422,23 +532,13 @@
           err = 'The place name is required. 请填写地点名称。';
         }
       } else {
-        w.data.story_cn = stepEl.querySelector('#w-story-cn').value.trim();
-        w.data.story_en = stepEl.querySelector('#w-story-en').value.trim();
-        w.data.transcript_cn = stepEl.querySelector('#w-transcript').value.trim();
-        w.data.dialect_name = stepEl.querySelector('#w-dialect-name').value.trim();
-        w.data.dialect_text = stepEl.querySelector('#w-dialect-text').value.trim();
-        w.data.dialect_note = stepEl.querySelector('#w-dialect-note').value.trim();
-        w.data.audio_description_cn = stepEl.querySelector('#w-ad-cn').value.trim();
-        w.data.audio_description_en = stepEl.querySelector('#w-ad-en').value.trim();
-        w.data.recorder_name = stepEl.querySelector('#w-recorder').value.trim();
-        w.data.license = stepEl.querySelector('#w-license').value;
         if (!w.data.story_cn || !w.data.story_en) err = 'The story is required in both languages. 请用中英文填写故事。';
         else if (!w.data.transcript_cn) err = 'The Mandarin transcript is required. 请填写普通话文字稿。';
         else if (!w.data.audio_description_cn) err = 'The audio description is required — it is written for visually impaired children. 请填写音频描述——它是为视障小朋友写的。';
         else if (!w.data.recorder_name) err = 'The recorder name is required. 请填写录音人。';
       }
       if (err) { S.showBanner(err, 'error'); return; }
-      if (w.step < 2) { w.step += 1; renderStep(); window.scrollTo(0, 0); }
+      if (w.step < 2) { w.step += 1; renderStep(); saveDraft(w); window.scrollTo(0, 0); }
       else save();
     }
 
@@ -472,6 +572,9 @@
       nextBtn.disabled = true;
       var storage = S.sb.storage.from('audio');
       var done = function (msg) {
+        /* The work is safely in Supabase now — a restored copy would only offer
+           to submit it a second time. */
+        if (w.mode === 'create') clearDraft();
         S.announce(msg);
         S.showBanner(msg, 'success');
         S.navigate(w.isAdmin ? '#/admin' : '#/submissions');
@@ -618,8 +721,19 @@
     }
     start();
 
+    if (restored) {
+      S.showBanner(restored.hadFile
+        ? 'We kept your draft — please choose the recording again. 已保留你的草稿，请重新选择录音文件。'
+        : 'We kept your draft. 已保留你的草稿。', 'info');
+    }
+
     return function destroy() {
       destroyed = true;
+      el.removeEventListener('input', onEdit);
+      el.removeEventListener('change', onEdit);
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('pagehide', captureNow);
+      window.removeEventListener('beforeunload', captureNow);
       if (w._cleanupStep2) { w._cleanupStep2(); w._cleanupStep2 = null; }
     };
   }

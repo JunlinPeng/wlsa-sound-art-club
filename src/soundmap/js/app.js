@@ -261,6 +261,10 @@
       main.innerHTML = '<div class="view-content"><div class="card"><p>Something went wrong rendering this page. 页面出错了，请刷新重试。</p></div></div>';
     }
     current.destroy = destroy;
+    /* Remember whose session this screen was actually painted for —
+       refreshAuth() compares against this, not against a value it captured
+       before its own await. See the comment there. */
+    renderedUserId = state.user ? state.user.id : null;
     updateNav();
     window.scrollTo(0, 0);
   }
@@ -271,21 +275,33 @@
      the initial screen, so that one must always route. */
   var hasRendered = false;
 
-  /* Re-reads the session and re-renders — but only when the person in front of
-     the screen actually changed.
+  /* Whose session the screen currently on display was painted for. */
+  var renderedUserId = null;
+
+  /* Re-reads the session and re-renders — but only when the screen on display
+     belongs to somebody else than the session we just read.
 
      supabase-js re-emits SIGNED_IN for the SAME user whenever the tab regains
-     focus: the visibilitychange handler runs _recoverAndRefresh, which ends in
+     focus: its visibilitychange handler runs _recoverAndRefresh(), which ends in
      _notifyAllSubscribers("SIGNED_IN", session). Our handler below already
      swallows TOKEN_REFRESHED for exactly this reason, but not SIGNED_IN — so a
      student switching to their recorder or the file picker and coming back threw
      away the half-filled submit wizard, whose state lives in the render closure
-     and cannot survive a re-render. Work was lost mid-submission, repeatedly.
+     and cannot survive a re-render.
+
+     Comparing against renderedUserId (set by the route() that painted the
+     screen) rather than against a value captured at the top of this function is
+     what makes that safe under concurrency. Two refreshAuth() calls overlap all
+     the time — auth.js fires one when the login succeeds while the pre-login one
+     is still awaiting getSession(). With an entry-time snapshot, the older call
+     resolves, sees "null -> member", and re-routes, rebuilding the wizard under
+     the student's cursor even though nothing about the session changed since the
+     screen was painted. renderedUserId is never stale: whoever rendered last,
+     wins.
 
      updateNav() still runs on every call, so nav links stay correct without
      rebuilding the view the user is typing into. */
   async function refreshAuth(force) {
-    var prevUserId = state.user ? state.user.id : null;
     if (!sb) {
       state.user = null;
       state.profile = null;
@@ -303,7 +319,7 @@
     updateNav();
     window.dispatchEvent(new CustomEvent('soundmap:auth'));
     var nextUserId = state.user ? state.user.id : null;
-    if (force || !hasRendered || nextUserId !== prevUserId) {
+    if (force || !hasRendered || nextUserId !== renderedUserId) {
       hasRendered = true;
       route();
     }

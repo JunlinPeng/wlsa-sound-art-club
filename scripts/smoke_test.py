@@ -6,9 +6,9 @@ Stdlib-only network checks; the map-renders/pin-count check uses a real
 browser when Selenium is installed, otherwise it SKIPs (the playbook's
 manual phone walk covers it then).
 
-Usage:
-    python scripts/smoke_test.py --url https://USER.github.io/wlsa-soundmap/
-    SITE_URL=https://USER.github.io/wlsa-soundmap/ python scripts/smoke_test.py
+Usage (the repo name is part of the URL — a wrong name 404s):
+    python scripts/smoke_test.py --url https://USER.github.io/wlsa-sound-art-club/
+    SITE_URL=https://USER.github.io/wlsa-sound-art-club/ python scripts/smoke_test.py
 """
 import argparse
 import json
@@ -41,7 +41,7 @@ def fetch(url: str, timeout: int = 20):
 def main() -> int:
     parser = argparse.ArgumentParser(description="Smoke-test the deployed sound map.")
     parser.add_argument("--url", default=os.environ.get("SITE_URL", ""),
-                        help="deployed site URL, e.g. https://USER.github.io/wlsa-soundmap/")
+                        help="deployed site URL, e.g. https://USER.github.io/wlsa-sound-art-club/")
     args = parser.parse_args()
 
     env = load_env(ENV_PATH)

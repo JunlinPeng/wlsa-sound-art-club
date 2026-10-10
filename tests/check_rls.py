@@ -87,10 +87,27 @@ class Client:
 
     # PostgREST ---------------------------------------------------------------
     def rest(self, method: str, table: str, body=None, query: str = ""):
+        # Guard against the mistake that made two checks here meaningless: a
+        # query string passed positionally lands in `body`, the filter is
+        # dropped, and the request quietly returns EVERY row. The checks then
+        # assert against body[0] — an arbitrary row — and pass or fail by luck.
+        # (The admin promotion check passed only because the first row returned
+        # happened to be the human admin's own profile.)
+        if isinstance(body, str):
+            raise TypeError(
+                f"rest({method!r}, {table!r}) received a query string as `body`: {body!r}. "
+                f"Pass it as query={body!r} instead."
+            )
         path = f"/rest/v1/{table}"
         if query:
             path += "?" + query
-        return self.request(method, path, body=body)
+        # PostgREST answers a write with an EMPTY body unless you ask for the row
+        # back, so every `body[0]` after an insert/update below exploded with
+        # "NoneType is not subscriptable". (A write blocked by a WITH CHECK
+        # policy has no rows to return and comes back as [], which the checks
+        # allow for explicitly.)
+        headers = {"Prefer": "return=representation"} if method != "GET" else None
+        return self.request(method, path, body=body, headers=headers)
 
     # Storage -------------------------------------------------------------------
     def upload(self, path: str, data: bytes):
@@ -153,7 +170,12 @@ def main() -> int:
               "(see playbooks/launch-soundmap.md), not in CI.")
         return 0
 
-    svc = Client(url, service_key)
+    # The service key goes in BOTH places. PostgREST is happy with `apikey`
+    # alone, but the Auth admin API (/auth/v1/admin/users) rejects `apikey`-only
+    # requests with 401 no_authorization — "This endpoint requires a valid Bearer
+    # token". Passing it as the token too is the documented pattern and is what
+    # makes the test-user setup below work at all.
+    svc = Client(url, service_key, service_key)
     anon = Client(url, anon_key)
 
     results = []
@@ -178,18 +200,21 @@ def main() -> int:
     created_objects = []
 
     def cleanup():
-        svc2 = Client(url, service_key)
+        # Reuse `svc` rather than building a fresh client: a copy made here would
+        # again lack the bearer token, and admin_delete_user would 401 — leaving
+        # test accounts behind on every run, each with a known password. The
+        # return values are ignored, so that failure is completely silent.
         for oid in created_rows:
-            svc2.rest("DELETE", "sounds", query=f"id=eq.{oid}")
+            svc.rest("DELETE", "sounds", query=f"id=eq.{oid}")
         for obj in created_objects:
-            svc2.remove(obj)
+            svc.remove(obj)
         # Demote the test admin first so guard_last_admin can never block the
         # user deletion (and never leaves a live admin with a known password).
         if admin_id:
-            svc2.rest("PATCH", "profiles", {"role": "member"}, f"id=eq.{admin_id}")
+            svc.rest("PATCH", "profiles", {"role": "member"}, f"id=eq.{admin_id}")
         for uid in (member_id, admin_id):
             if uid:
-                svc2.admin_delete_user(uid)
+                svc.admin_delete_user(uid)
 
     try:
         # ---------------------------------------------------------- users ----
@@ -206,19 +231,25 @@ def main() -> int:
         st, body = svc.rest("PATCH", "profiles", {"role": "admin"}, f"id=eq.{admin_id}")
         if not hard("promote admin test user", st, body):
             return 1
-        st, body = svc.rest("GET", "profiles", f"id=eq.{admin_id}&select=role")
+        st, body = svc.rest("GET", "profiles", query=f"id=eq.{admin_id}&select=role")
         check("admin promotion took effect",
               st == 200 and body and body[0]["role"] == "admin", str(body)[:120])
 
         st, body = svc.rest("PATCH", "profiles", {"role": "member"}, f"id=eq.{member_id}")
         if not hard("promote member test user", st, body):
             return 1
-        st, body = svc.rest("GET", "profiles", f"id=eq.{member_id}&select=role")
+        st, body = svc.rest("GET", "profiles", query=f"id=eq.{member_id}&select=role")
         check("member promotion took effect",
               st == 200 and body and body[0]["role"] == "member", str(body)[:120])
 
-        st, body = anon.rest("GET", "profiles", "select=id&limit=1")
-        check("anon cannot read profiles", st >= 400, f"status {st}")
+        st, body = anon.rest("GET", "profiles", query="select=id&limit=1")
+        # anon has no SELECT policy on profiles, and PostgREST expresses an RLS
+        # USING failure as a 2xx with ZERO rows — not a 4xx. So "denied" here
+        # means 200 + an empty list; demanding >= 400 fails a healthy backend.
+        # What must never happen is rows coming back.
+        leaked = [r for r in body] if isinstance(body, list) else []
+        check("anon cannot read profiles", st >= 400 or (st == 200 and not leaked),
+              f"status {st}, rows={len(leaked) if isinstance(body, list) else body!r}")
 
         st, body = Client(url, anon_key).sign_in(member_email, password)
         check("member signs in", st == 200 and bool(body.get("access_token")), f"status {st}")
@@ -237,18 +268,21 @@ def main() -> int:
         pending_row = sound_row("RLS pending sound", "pending",
                                 f"pending/{FIXED_PENDING}.mp3",
                                 {"id": FIXED_PENDING})
+        # Register the fixed ids with cleanup BEFORE inserting. If anything
+        # between the insert and the append throws, cleanup never learns the row
+        # exists — it survives the run and the next one dies on a duplicate key.
+        # (Both rows use fixed UUIDs, so the ids are known in advance.)
+        created_rows.extend([FIXED_APPROVED, FIXED_PENDING])
         st, body = svc.rest("POST", "sounds", approved_row, "select=id")
         if not hard("service key seeds approved row", st, body):
             return 1
         approved_id = body[0]["id"]
-        created_rows.append(approved_id)
         st, body = svc.rest("POST", "sounds", pending_row, "select=id")
         if not hard("service key seeds pending row", st, body):
             return 1
         pending_id = body[0]["id"]
-        created_rows.append(pending_id)
 
-        st, body = anon.rest("GET", "sounds", "select=id")
+        st, body = anon.rest("GET", "sounds", query="select=id")
         anon_ids = {r["id"] for r in (body or [])} if isinstance(body, list) else set()
         check("anon reads approved rows", st == 200 and approved_id in anon_ids, f"status {st}")
         check("anon never reads pending rows", pending_id not in anon_ids)
@@ -295,14 +329,14 @@ def main() -> int:
         st, body = member.rest("PATCH", "sounds", {"title_en": "hacked"}, f"id=eq.{approved_id}")
         check("member cannot edit others' rows", st < 300 and (body is None or body == []),
               f"status {st} {str(body)[:120]}")
-        st, body = member.rest("GET", "sounds", f"id=eq.{approved_id}&select=title_en")
+        st, body = member.rest("GET", "sounds", query=f"id=eq.{approved_id}&select=title_en")
         check("others' rows are untouched after the attempt",
               st == 200 and body and body[0]["title_en"] == "RLS test sound")
 
         st, body = member.rest("DELETE", "sounds", query=f"id=eq.{approved_id}")
         check("member cannot delete others' rows", st < 300 and (body is None or body == []),
               f"status {st}")
-        st, body = member.rest("GET", "sounds", f"id=eq.{approved_id}&select=id")
+        st, body = member.rest("GET", "sounds", query=f"id=eq.{approved_id}&select=id")
         check("others' rows still exist after the delete attempt",
               st == 200 and body and body[0]["id"] == approved_id)
 
@@ -325,11 +359,15 @@ def main() -> int:
                                {"title_en": "edited title", "status": "pending"},
                                f"id=eq.{own_id}")
         check("member can edit own rejected row (resubmit)", st < 300, f"status {st}")
-        st, body = member.rest("GET", "sounds", f"id=eq.{own_id}&select=status")
+        st, body = member.rest("GET", "sounds", query=f"id=eq.{own_id}&select=status")
         check("member edit resets the row to pending",
               st == 200 and body and body[0]["status"] == "pending", str(body)[:120])
 
-        # Admin review rules.
+        # Admin review rules. "Rejecting requires a note" is satisfied by whatever
+        # note is ON the row, and this row still carries one from the rejection
+        # above (the member's resubmit reset the status but not the note). Clear
+        # it first, or the check passes on the stale note and verifies nothing.
+        svc.rest("PATCH", "sounds", {"review_note": None}, f"id=eq.{own_id}")
         st, body = admin.rest("PATCH", "sounds", {"status": "rejected"}, f"id=eq.{own_id}")
         check("admin cannot reject without a review note", st >= 400, f"status {st}")
         st, body = admin.rest("PATCH", "sounds",
@@ -409,7 +447,7 @@ def main() -> int:
                                "approved_at": "2026-10-09T00:00:00Z", "approved_by": admin_id},
                               f"id=eq.{own_id}")
         check("admin approves after the move", st < 300, f"status {st} {str(body)[:120]}")
-        st, body = anon.rest("GET", "sounds", f"id=eq.{own_id}&select=status")
+        st, body = anon.rest("GET", "sounds", query=f"id=eq.{own_id}&select=status")
         check("approved row is visible to anon",
               st == 200 and body and body[0]["status"] == "approved")
 

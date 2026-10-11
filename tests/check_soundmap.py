@@ -117,6 +117,22 @@ def main() -> int:
                       "player-toggle", "player-title", "player-sub",
                       "player-story", "player-close", "logout-btn"):
             check(f"index.html has #{el_id}", f'id="{el_id}"' in html)
+
+        # Every '#/x/…' hash route must have a matching registerView('x') —
+        # the story view once registered as 'detail' while every link said
+        # '#/sound/', so tapping Story silently re-rendered the map (route()
+        # falls back to 'map' for unknown view names).
+        registered = set()
+        for p in (SRC / "js").glob("*.js"):
+            registered |= set(re.findall(r"S\.registerView\('([a-z_]+)'",
+                                         p.read_text(encoding="utf-8")))
+        routes = set()
+        for p in list((SRC / "js").glob("*.js")) + [index]:
+            routes |= set(re.findall(r"#/([a-z_]+)(?:/|[\"'])",
+                                     p.read_text(encoding="utf-8")))
+        dangling = sorted(r for r in routes if r not in registered)
+        check("every #/ hash route has a registered view", not dangling,
+              "no registerView() for: " + "; ".join(dangling))
     else:
         check("index.html exists", False)
 

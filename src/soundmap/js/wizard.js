@@ -59,6 +59,35 @@
     return null;
   }
 
+  /* The filename alone can lie: some phone voice recorders write legacy
+     MPEG Layer II audio into a file named .mp3, which browsers cannot
+     decode. Sniff the magic bytes and refuse anything unplayable. */
+  async function sniffAudio(file) {
+    var ext = extOf(file.name);
+    var head = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+    var ok;
+    if (ext === 'mp3') {
+      // An "ID3" tag, or an MPEG frame header whose layer bits are 01
+      // (Layer III). Layer II (10), Layer I (11) and reserved (00) all fail.
+      ok = (head[0] === 0x49 && head[1] === 0x44 && head[2] === 0x33)
+        || (head[0] === 0xFF && (head[1] & 0x06) === 0x02);
+    } else {
+      // ISO-BMFF/MP4 container: "ftyp" at offset 4 (every iPhone voice memo).
+      ok = head[4] === 0x66 && head[5] === 0x74 && head[6] === 0x79 && head[7] === 0x70;
+    }
+    if (ok) return null;
+    return ext === 'mp3'
+      ? 'This recording is in a legacy format (MPEG Layer II) your browser can\'t play — re-export it as MP3 or M4A/AAC from your recorder app. '
+        + '这段录音是旧的 MPEG Layer II 格式，浏览器无法播放——请在录音应用里重新导出为 MP3 或 M4A/AAC。'
+      : 'This .m4a file does not contain AAC audio your browser can play — re-export it from your recorder app. '
+        + '这个 m4a 文件不含浏览器可播放的 AAC 音频——请在录音应用里重新导出。';
+  }
+
+  /* Storage content type by real container; browsers check it when playing. */
+  function audioType(file) {
+    return extOf(file.name) === 'm4a' ? 'audio/mp4' : 'audio/mpeg';
+  }
+
   function bboxOk(lng, lat) {
     return lng >= BBOX.lngMin && lng <= BBOX.lngMax && lat >= BBOX.latMin && lat <= BBOX.latMax;
   }
@@ -342,8 +371,10 @@
       var drop = stepEl.querySelector('#w-drop');
       var dropText = stepEl.querySelector('#w-drop-text');
 
-      function setFile(file) {
+      async function setFile(file) {
         var err = validateFile(file);
+        if (err) { S.showBanner(err, 'error'); return; }
+        err = await sniffAudio(file).catch(function () { return null; });
         if (err) { S.showBanner(err, 'error'); return; }
         w.file = file;
         dropText.textContent = file.name + ' (' + (file.size / 1024 / 1024).toFixed(1) + ' MB) — click to change 点击更换';
@@ -590,7 +621,7 @@
           payload.audio_path = path;
           var ins = await S.sb.from('sounds').insert(payload);
           if (ins.error) throw new Error(ins.error.message + ' · 保存失败。');
-          var up = await storage.upload(path, w.file, { contentType: w.file.type || 'audio/mpeg' });
+          var up = await storage.upload(path, w.file, { contentType: audioType(w.file) });
           if (up.error) {
             await S.sb.from('sounds').delete().eq('id', id);
             throw new Error('Audio upload failed: ' + up.error.message + ' · 音频上传失败，请重试。');
@@ -625,7 +656,7 @@
 
         if (w.file) {
           newPath = 'pending/' + w.id + '.' + extOf(w.file.name);
-          var up2 = await storage.upload(newPath, w.file, { upsert: true, contentType: w.file.type || 'audio/mpeg' });
+          var up2 = await storage.upload(newPath, w.file, { upsert: true, contentType: audioType(w.file) });
           if (up2.error) {
             throw new Error('Audio upload failed: ' + up2.error.message + ' · 音频上传失败，请重试。');
           }

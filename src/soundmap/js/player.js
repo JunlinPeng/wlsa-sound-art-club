@@ -20,6 +20,7 @@
   var current = null;              // { sound, url }
   var urlCache = {};               // sound.id -> { url, expiresAt }
   var retried = false;
+  var errored = false;             // the 'error' event already reported this load
 
   var SB = function () { return window.SoundMap.sb; };
 
@@ -45,6 +46,7 @@
 
   function fill(sound, url) {
     current = { sound: sound, url: url };
+    errored = false;
     titleEl.textContent = sound.title_en + ' · ' + sound.title_cn;
     subEl.textContent = window.SoundMap.label('category', sound.category).cn + ' · '
       + window.SoundMap.label('time', sound.time_of_day).cn + ' — '
@@ -56,13 +58,27 @@
     audio.src = url;
   }
 
-  function start() {
+  /* play() rejects without firing an error event in some failure modes;
+     report that unless the error event already said something specific. */
+  function playCurrent() {
     setBarState('loading');
-    audio.play().then(function () {
+    return audio.play().then(function () {
       setBarState('playing');
-      window.SoundMap.announce('Now playing: ' + current.sound.title_en + ' · 正在播放：' + current.sound.title_cn);
-    }).catch(function () {
+      return true;
+    }).catch(function (err) {
       setBarState('paused');
+      if (!errored && (!err || err.name !== 'AbortError')) {
+        window.SoundMap.showBanner('Playback failed. 播放失败，请重试。', 'error');
+      }
+      return false;
+    });
+  }
+
+  function start() {
+    playCurrent().then(function (ok) {
+      if (ok) {
+        window.SoundMap.announce('Now playing: ' + current.sound.title_en + ' · 正在播放：' + current.sound.title_cn);
+      }
     });
   }
 
@@ -72,9 +88,8 @@
       return;
     }
     if (current && current.sound.id === sound.id) {
-      if (audio.paused) {
-        audio.play().then(function () { setBarState('playing'); }).catch(function () { setBarState('paused'); });
-      } else { audio.pause(); setBarState('paused'); }
+      if (audio.paused) playCurrent();
+      else { audio.pause(); setBarState('paused'); }
       return;
     }
     retried = false;
@@ -101,9 +116,8 @@
 
   toggleBtn.addEventListener('click', function () {
     if (!current) return;
-    if (audio.paused) {
-      audio.play().then(function () { setBarState('playing'); }).catch(function () { setBarState('paused'); });
-    } else { audio.pause(); setBarState('paused'); }
+    if (audio.paused) playCurrent();
+    else { audio.pause(); setBarState('paused'); }
   });
 
   closeBtn.addEventListener('click', stop);
@@ -113,7 +127,21 @@
   audio.addEventListener('ended', function () { setBarState('paused'); });
   audio.addEventListener('error', function () {
     if (!current) return;
-    // Signed URL may have expired mid-session: refresh once and retry.
+    var code = audio.error && audio.error.code;
+    errored = true;
+    /* 3 = MEDIA_ERR_DECODE, 4 = MEDIA_ERR_SRC_NOT_SUPPORTED: the bytes are
+       simply unplayable (e.g. MPEG Layer II mislabeled as .mp3) — re-signing
+       the same bytes cannot help, so say what is actually wrong. */
+    if (code === 3 || code === 4) {
+      setBarState('paused');
+      window.SoundMap.showBanner('This recording uses a format your browser can\'t play (it may be MP2, not MP3). '
+        + '这段录音的格式浏览器无法播放（可能是 MP2 而非 MP3）。', 'error');
+      return;
+    }
+    /* 1 = MEDIA_ERR_ABORTED: the user or the app interrupted; no banner. */
+    if (code === 1) { setBarState('paused'); return; }
+    /* 2 = MEDIA_ERR_NETWORK (or unknown): the signed URL may have expired
+       mid-session — refresh once and retry. */
     if (!retried) {
       retried = true;
       var sound = current.sound;

@@ -146,5 +146,8 @@
     };
   }
 
-  S.registerView('detail', { render: render });
+  /* Every Story link on the site (player bar, map popup, list card, admin
+     queue) points at '#/sound/<id>' — the registration name must match or
+     route() falls back to 'map' and the story page never opens. */
+  S.registerView('sound', { render: render });
 })();
